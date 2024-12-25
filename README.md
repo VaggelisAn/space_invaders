@@ -8,6 +8,7 @@ This project follows the steps described in emulator101.com (as of now the site 
 Later goals include optimization experiments.
 
 Common Abbreviations used:
+
 R       Any of the 8-Bit registers A,B,C,D,E,H,L.
 
 data    Any 8-bit or 16-bit value.
