@@ -4,33 +4,32 @@
 #include <stdlib.h>
 
 #include "space_invaders.h"
+#include "emulator_8080.c"
+#include "disassembler_8080.c"
+#include "state_handling.c"
 
 int main (int argc, char**argv)    
-   {    
-    FILE *f= fopen(argv[1], "rb");    
-    if (f==NULL)    
-    {    
-        printf("error: Couldn't open %s\n", argv[1]);    
-        exit(1);    
-    }    
+   {   
+    STATE_8080 state_8080;
+    int mem_size;
 
-    //Get the file size and read it into a memory buffer    
-    fseek(f, 0L, SEEK_END);    
-    int fsize = ftell(f);    
-    fseek(f, 0L, SEEK_SET);    
+    if (argc<2){
+        printf("error: Missing filename argument.\n");
+        return 1;
+    }
 
-    unsigned char *buffer=malloc(fsize);    
+    init_state_8080(&state_8080);
+    mem_size = init_memory(&state_8080, argv[1]);
+    if (mem_size < 0){
+        printf("error: Memory initialization failed.\n");
+        return 1;
+    }
 
-    fread(buffer, fsize, 1, f);    
-    fclose(f);    
-
-    int pc = 0;    
-
-    while (pc < fsize)    
-        pc += disassembler_8080(buffer, pc);     
-
-    //emulator_8080();
-
+    while (state_8080.pc < mem_size){
+        disassembler_8080(&state_8080);
+        emulator_8080(&state_8080);
+    }
+    print_state(state_8080);
     return 0;    
 }   
 

@@ -1,23 +1,9 @@
-/*
-Common Abbreviations:
-R       Any of the 8-Bit registers A,B,C,D,E,H,L.
-data    Any 8-bit or 16-bit value.
-PC      Program Counter.
-SP      Stack Pointer.
-RM      Register A,B,C,D,E,H,L or memory M pointed by HL.
-BD      Either register pair BC or DE  (B=BC, D=DE).
-BP      Any byte pair symbol (B=BC, D=DE, H=HL, PSW=AF).
-RP      Any register pair (B=BC, D=DE, H=HL, SP=SP).
-Addr    A 16-Byte address.
-Source: https://gist.github.com/joefg/634fa4a1046516d785c9
-*/
-
 #include "space_invaders.h"
 
-int disassembler_8080(unsigned char *code_buffer, int pc){
-    unsigned char *op = &code_buffer[pc]; 
+void disassembler_8080(STATE_8080 *state){
+    unsigned char *op = &state->memory[state->pc];    
     int opbytes = 1;
-    printf("%04x  ", pc);
+    printf("%04x  ", state->pc);
 
     switch (*op){
 		case 0x00:
@@ -40,7 +26,7 @@ int disassembler_8080(unsigned char *code_buffer, int pc){
         case 0x03: printf("INX\tB");                                        break;
         case 0x04: printf("INR\tB");                                        break;
         case 0x05: printf("DCR\tB");                                        break;
-        case 0x06: printf("MVI\tB #$0x%02x", op[1]);            opbytes=2;  break;
+        case 0x06: printf("MVI\tB,#$0x%02x", op[1]);            opbytes=2;  break;
         case 0x07: printf("RLC");                                           break;
 
         case 0x09: printf("DAD\tB");                                        break;
@@ -48,7 +34,7 @@ int disassembler_8080(unsigned char *code_buffer, int pc){
         case 0x0b: printf("DCX\tB");                                        break;
         case 0x0c: printf("INR\tC");                                        break;
         case 0x0d: printf("DCR\tC");                                        break;
-        case 0x0e: printf("MVI\tC #$0x%02x", op[1]);            opbytes=2;  break;
+        case 0x0e: printf("MVI\tC,#$0x%02x", op[1]);            opbytes=2;  break;
         case 0x0f: printf("RRC");                                           break;
 
         case 0x11: printf("LXI\tD,#$0x%02x%02x", op[2], op[1]);opbytes=3;  break;
@@ -56,7 +42,7 @@ int disassembler_8080(unsigned char *code_buffer, int pc){
         case 0x13: printf("INX\tD");                                        break;
         case 0x14: printf("INR\tD");                                        break;
         case 0x15: printf("DCR\tD");                                        break;
-        case 0x16: printf("MVI\tD #$0x%02x", op[1]);            opbytes=2;  break;
+        case 0x16: printf("MVI\tD,#$0x%02x", op[1]);            opbytes=2;  break;
         case 0x17: printf("RAL");                                           break;
 
         case 0x19: printf("DAD\tD");                                        break;
@@ -64,7 +50,7 @@ int disassembler_8080(unsigned char *code_buffer, int pc){
         case 0x1b: printf("DCX\tD");                                        break;
         case 0x1c: printf("INR\tE");                                        break;
         case 0x1d: printf("DCR\tE");                                        break;
-        case 0x1e: printf("MVI\tE #$0x%02x", op[1]);            opbytes=2;  break;
+        case 0x1e: printf("MVI\tE,#$0x%02x", op[1]);            opbytes=2;  break;
         case 0x1f: printf("RAR");                                           break;
 
         case 0x21: printf("LXI\tH,#$0x%02x%02x", op[2], op[1]);opbytes=3;  break;
@@ -72,7 +58,7 @@ int disassembler_8080(unsigned char *code_buffer, int pc){
         case 0x23: printf("INX\tH");                                        break;
         case 0x24: printf("INR\tH");                                        break;
         case 0x25: printf("DCR\tH");                                        break;
-        case 0x26: printf("MVI\tH #$0x%02x", op[1]);            opbytes=2;  break;
+        case 0x26: printf("MVI\tH,#$0x%02x", op[1]);            opbytes=2;  break;
         case 0x27: printf("DAA");                                           break;
 
         case 0x29: printf("DAD\tH");                                        break;
@@ -80,7 +66,7 @@ int disassembler_8080(unsigned char *code_buffer, int pc){
         case 0x2b: printf("DCX\tH");                                        break;
         case 0x2c: printf("INR\tL");                                        break;
         case 0x2d: printf("DCR\tL");                                        break;
-        case 0x2e: printf("MVI\tL #$0x%02x", op[1]);            opbytes=2;  break;
+        case 0x2e: printf("MVI\tL,#$0x%02x", op[1]);            opbytes=2;  break;
         case 0x2f: printf("CMA");                                           break;
 
         case 0x31: printf("LXI\tSP,#$0x%02x%02x", op[2], op[1]);opbytes=3;  break;
@@ -88,7 +74,7 @@ int disassembler_8080(unsigned char *code_buffer, int pc){
         case 0x33: printf("INX\tSP");                                       break;
         case 0x34: printf("INR\tM");                                        break;
         case 0x35: printf("DCR\tM");                                        break;
-        case 0x36: printf("MVI\tM #$0x%02x", op[1]);            opbytes=2;  break;
+        case 0x36: printf("MVI\tM,#$0x%02x", op[1]);            opbytes=2;  break;
         case 0x37: printf("STC");                                           break;
 
         case 0x39: printf("DAD\tSP");                                       break;
@@ -314,9 +300,8 @@ int disassembler_8080(unsigned char *code_buffer, int pc){
 		case 0xfe: printf("CPII\t#$0x%02x", op[1]);             opbytes=2;  break;
         case 0xff: printf("RST\t7");                                        break;
     default:
-        printf("ERROR - OPCODE '%x' NOT RECOGNIZED", *op);
+        printf("debugging error: opcode %x not recognised by disassembler\n", *op);
         break;
     }
     printf("\n");
-    return opbytes;
 }
