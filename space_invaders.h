@@ -26,12 +26,17 @@ typedef struct STATE_8080 {
     uint16_t    pc;
     uint8_t     *memory;    
     struct      CONDITION_CODES cc;    
-    //uint8_t     int_enable;    
+    uint8_t     int_enable;    
 } STATE_8080; 
 
 void emulator_8080(STATE_8080 *state);
-void disassembler_8080(STATE_8080 *state_8080);
-void init_state_8080(STATE_8080 *state_8080);
-int init_memory(STATE_8080 *state_8080, char *filename);
+void disassembler_8080(STATE_8080 *state);
+STATE_8080* init_state_8080(void);
+int load_memory(STATE_8080 *state, char *filename);
+void print_state(STATE_8080 state, int counter);
+void export_mem(STATE_8080 state);
+
+#define MEM_SIZE 0x10000 //16K
+#define FILE_BUFF_SIZE 1024
 
 #endif

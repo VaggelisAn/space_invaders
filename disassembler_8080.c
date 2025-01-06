@@ -297,10 +297,11 @@ void disassembler_8080(STATE_8080 *state){
         case 0xfb: printf("EI");                                            break;
         case 0xfc: printf("CM\t0x%02x%02x", op[2], op[1]);      opbytes=3;  break;
 
-		case 0xfe: printf("CPII\t#$0x%02x", op[1]);             opbytes=2;  break;
+		case 0xfe: printf("CPI\t#$0x%02x", op[1]);             opbytes=2;  break;
         case 0xff: printf("RST\t7");                                        break;
     default:
         printf("debugging error: opcode %x not recognised by disassembler\n", *op);
+        printf("opbytes=%d\n", opbytes);
         break;
     }
     printf("\n");

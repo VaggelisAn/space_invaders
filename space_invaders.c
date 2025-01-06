@@ -1,4 +1,8 @@
-
+/*
+*   Emulator for the videogame Space Invaders, written in C.
+*   Vaggelis Ananiadis 20/12/24
+*
+*/
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -10,7 +14,7 @@
 
 int main (int argc, char**argv)    
    {   
-    STATE_8080 state_8080;
+    STATE_8080 *state;
     int mem_size;
 
     if (argc<2){
@@ -18,18 +22,55 @@ int main (int argc, char**argv)
         return 1;
     }
 
-    init_state_8080(&state_8080);
-    mem_size = init_memory(&state_8080, argv[1]);
+    state = init_state_8080();
+    mem_size = load_memory(state, argv[1]);
     if (mem_size < 0){
         printf("error: Memory initialization failed.\n");
         return 1;
     }
 
-    while (state_8080.pc < mem_size){
-        disassembler_8080(&state_8080);
-        emulator_8080(&state_8080);
+    int counter = 0;
+    while (state->pc < mem_size){
+        disassembler_8080(state);
+
+        uint8_t *op = &state->memory[state->pc];    
+
+        //machine specific handling for IN   
+        if (*op == 0xdb){
+            uint8_t port = op[1];    
+            state->a = machine_IN(state, port);    
+            state->pc++;    
+        }    
+        //machine specific handling for OUT   
+        else if (*op == 0xd3){
+            uint8_t port = op[1];    
+            machine_OUT(state, port);    
+            state->pc++;    
+        }    
+        else    
+            emulator_8080(state);
+
     }
-    print_state(state_8080);
+    print_state(*state, counter);
+    export_mem(*state);
+
     return 0;    
 }   
+
+/*
+        // if (counter < 1751){
+        //     counter++;
+        //     continue;
+        // }
+        // else{
+        //     print_state(*state, counter);
+        //     export_mem(*state);
+        //     getchar();
+        //     counter++;
+        // }
+        // print_state(*state, counter);
+        // export_mem(*state);
+        // getchar();
+        // counter++;
+*/
 
