@@ -1,5 +1,7 @@
 # space_invaders
 
+UNDER DEVELOPMENT
+
 Emulator for the videogame Space Invaders, written in C.
 Space Invaders originally uses an Intel 8080 CPU. This project does not fully emulate the 8080 architecture, since only 50 instructions were used for the development of the game.
 
